@@ -17,7 +17,7 @@ export class RequestLoggerInterceptor implements NestInterceptor {
     next: CallHandler<any>,
   ): Observable<any> | Promise<Observable<any>> {
     const requestType = context.getType();
-    if (requestType !== 'http') next.handle();
+    if (requestType !== 'http') return next.handle();
 
     const http = context.switchToHttp();
     const request: Request = http.getRequest();

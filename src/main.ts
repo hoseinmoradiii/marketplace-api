@@ -6,7 +6,7 @@ import helmet from 'helmet';
 import { Logger } from './common/logger/logger.service.js';
 import { CatchAllErrorsFilter } from './common/filters/all-exception.filter.js';
 import { SwaggerConfig } from './configs/swagger.config.js';
-const cookieParser = require('cookie-parser');
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,7 +21,7 @@ async function bootstrap() {
   app.useGlobalFilters(new CatchAllErrorsFilter());
   app.use(helmet());
   const configService = app.get(ConfigService);
-  const PORT = configService.getOrThrow<number>('PORT') ?? 3004;
+  const PORT = configService.getOrThrow<number>('PORT');
 
   SwaggerConfig.forRoot(app);
 

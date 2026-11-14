@@ -20,7 +20,11 @@ export class CatchAllErrorsFilter implements ExceptionFilter {
       reasonPhrase: ReasonPhrases.INTERNAL_SERVER_ERROR,
     };
 
-    if (exception instanceof QueryFailedError) {
+    if (exception instanceof ValidationException) {
+      errorResponse.statusCode = exception.getStatus();
+      errorResponse.message = exception.message;
+      errorResponse.reasonPhrase = exception.validationError;
+    } else if (exception instanceof QueryFailedError) {
       errorResponse.statusCode = StatusCodes.BAD_REQUEST;
       errorResponse.message = 'Database error occurred';
       errorResponse.reasonPhrase = (
@@ -30,10 +34,6 @@ export class CatchAllErrorsFilter implements ExceptionFilter {
       errorResponse.message = exception.message;
       errorResponse.statusCode = exception.getStatus();
       errorResponse.reasonPhrase = exception.getResponse();
-    } else if (exception instanceof ValidationException) {
-      errorResponse.message = exception.getResponse().toString();
-      errorResponse.statusCode = exception.getStatus();
-      errorResponse.reasonPhrase = exception.message;
     } else {
       console.error('[UnhandledError]', exception);
     }

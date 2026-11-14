@@ -1,9 +1,11 @@
-import { Controller, Delete, Get } from '@nestjs/common';
+import { Controller, Delete, Get, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service.js';
 import { UserEntity } from './entities/user.entity.js';
 import { UserId } from './decorators/user-id.decorator.js';
+import { RefreshTokenGuard } from '../auth/guards/refresh-token.guard.js';
 
 @Controller('user')
+@UseGuards(RefreshTokenGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

@@ -7,7 +7,7 @@ import { Request } from 'express';
 
 export const UserId = createParamDecorator(
   (_: any, context: ExecutionContext) => {
-    const request: Request = context.switchToHttp().getResponse();
+    const request: Request = context.switchToHttp().getRequest();
     const userId = request.userId;
     if (!userId) throw new ForbiddenException('Access Denied');
     return userId;
