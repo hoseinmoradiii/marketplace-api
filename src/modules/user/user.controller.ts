@@ -1,6 +1,7 @@
 import { Controller, Delete, Get } from '@nestjs/common';
 import { UserService } from './user.service.js';
 import { UserEntity } from './entities/user.entity.js';
+import { UserId } from './decorators/user-id.decorator.js';
 
 @Controller('user')
 export class UserController {
