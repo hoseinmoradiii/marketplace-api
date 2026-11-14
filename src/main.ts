@@ -6,9 +6,11 @@ import helmet from 'helmet';
 import { Logger } from './common/logger/logger.service.js';
 import { CatchAllErrorsFilter } from './common/filters/all-exception.filter.js';
 import { SwaggerConfig } from './configs/swagger.config.js';
+const cookieParser = require('cookie-parser');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
