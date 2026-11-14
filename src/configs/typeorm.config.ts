@@ -1,5 +1,6 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserEntity } from '../modules/user/entities/user.entity.js';
 
 export class TypeormConfig {
   static forRoot() {
@@ -13,7 +14,7 @@ export class TypeormConfig {
         password: configService.getOrThrow<string>('DB_PASSWORD'),
         port: configService.getOrThrow<number>('DB_PORT'),
         username: configService.getOrThrow<string>('DB_USER'),
-        entities: [],
+        entities: [UserEntity],
         synchronize:
           configService.getOrThrow<string>('NODE_ENV') === 'development'
             ? true
