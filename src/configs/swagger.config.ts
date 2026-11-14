@@ -8,8 +8,15 @@ import {
 export class SwaggerConfig {
   static forRoot(app: INestApplication) {
     const config = new DocumentBuilder()
-      .setTitle('Bank Ledger System')
-      .setDescription('A bank ledger system designed with DDD structure')
+      .setTitle('True Offers API')
+      .setDescription(
+        [
+          'REST API for the **True Offers** marketplace platform.',
+          '',
+          '### Authentication',
+          'Protected endpoints require a **JWT Bearer token** in the `Authorization` header.',
+        ].join('\n'),
+      )
       .setVersion('v0.0.1')
       .addBearerAuth(this.swaggerAuthConfig(), 'jwt')
       .addSecurityRequirements('jwt')

@@ -2,7 +2,6 @@ import { ArgumentsHost, ExceptionFilter, HttpException } from '@nestjs/common';
 import { Response } from 'express';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import { QueryFailedError } from 'typeorm';
-import { DomainError } from '../../modules/shared/domain/domain.error.js';
 import { ValidationException } from '../exceptions/validation.exception.js';
 
 interface ErrorResponse {
@@ -21,11 +20,7 @@ export class CatchAllErrorsFilter implements ExceptionFilter {
       reasonPhrase: ReasonPhrases.INTERNAL_SERVER_ERROR,
     };
 
-    if (exception instanceof DomainError) {
-      errorResponse.message = exception.message;
-      errorResponse.statusCode = exception.statusCode;
-      errorResponse.reasonPhrase = exception.reasonPhrase;
-    } else if (exception instanceof QueryFailedError) {
+    if (exception instanceof QueryFailedError) {
       errorResponse.statusCode = StatusCodes.BAD_REQUEST;
       errorResponse.message = 'Database error occurred';
       errorResponse.reasonPhrase = (
