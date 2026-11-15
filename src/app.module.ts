@@ -5,6 +5,7 @@ import { LoggerModule } from './common/logger/logger.module.js';
 import { UserModule } from './modules/user/user.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { RedisModule } from './modules/redis/redis.module.js';
+import { DealModule } from './modules/deal/deal.module.js';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { RedisModule } from './modules/redis/redis.module.js';
     TypeormConfig.forRoot(),
     UserModule,
     AuthModule,
+    DealModule,
   ],
 })
 export class AppModule {}
