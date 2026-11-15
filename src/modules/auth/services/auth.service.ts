@@ -120,9 +120,9 @@ export class AuthService {
 
   async regenerateAccessToken(refreshToken: string): Promise<AccessToken> {
     const payload = this.tokenService.verifyRefreshToken(refreshToken);
-    if (!payload || !payload.userId)
+    if (!payload || !payload.sub)
       throw new UnauthorizedException('invalid token');
-    const user = await this.userRepository.findById(payload.userId);
+    const user = await this.userRepository.findById(payload.sub);
     if (!user || user.refreshToken !== refreshToken)
       throw new UnauthorizedException('Invalid refresh token');
     const accessToken = this.tokenService.generateAccessToken(user.id);

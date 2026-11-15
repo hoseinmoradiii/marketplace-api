@@ -14,7 +14,7 @@ export class UserEntity extends CoreEntity {
   @Column({ name: 'mobile_verified', default: false })
   mobileVerified: boolean;
 
-  @Column({ name: 'acccess_token', nullable: true, default: null })
+  @Column({ name: 'access_token', nullable: true, default: null })
   accessToken: string
 
   @Column({ name: 'refresh_token', nullable: true, default: null })

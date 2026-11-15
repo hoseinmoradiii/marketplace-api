@@ -1,9 +1,19 @@
-export type AccessToken = {
+import { ApiProperty } from '@nestjs/swagger';
+
+export class AccessToken {
+  @ApiProperty({ description: 'JWT access token (10m expiry)' })
   accessToken: string;
-};
+}
 
-export type RefreshToken = {
+export class RefreshToken {
+  @ApiProperty({ description: 'JWT refresh token (30d expiry)' })
   refreshToken: string;
-};
+}
 
-export type Tokens = RefreshToken & AccessToken;
+export class Tokens {
+  @ApiProperty({ description: 'JWT access token (10m expiry)' })
+  accessToken: string;
+
+  @ApiProperty({ description: 'JWT refresh token (30d expiry)' })
+  refreshToken: string;
+}

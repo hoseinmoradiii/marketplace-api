@@ -32,7 +32,7 @@ export class RequestLoggerInterceptor implements NestInterceptor {
             Number(process.hrtime.bigint() - startTime) / 1_000_000;
 
           this.logger.log(
-            `${method} ${originalUrl} ${response.status} - ${duration.toFixed(2)}ms`,
+            `${method} ${originalUrl} ${response.statusCode} - ${duration.toFixed(2)}ms`,
           );
         },
 

@@ -2,12 +2,18 @@ export {};
 declare global {
   namespace Express {
     export interface Request {
-      userId?: string;
+      user?: {
+        userId?: string;
+        tokenId?: string;
+      };
     }
   }
 }
 declare module 'express-serve-static-core' {
   export interface Request {
-    userId?: string;
+    user?: {
+      userId?: string;
+      tokenId?: string;
+    };
   }
 }

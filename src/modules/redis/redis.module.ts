@@ -18,6 +18,6 @@ import { RedisService } from './redis.service.js';
     },
     RedisService,
   ],
-  exports: [REDIS],
+  exports: [REDIS, RedisService],
 })
 export class RedisModule {}
