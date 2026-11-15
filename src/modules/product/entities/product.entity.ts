@@ -12,12 +12,15 @@ import {
 } from 'typeorm';
 import { UserEntity } from '../../user/entities/user.entity.js';
 import { ProductStatus } from '../utils/enums/product-status.enum.js';
+import { EntityNames } from '../../../common/enums/entity-names.enum.js';
+import { CoreEntity } from '../../../common/abstracts/core.entity.js';
+import { OfferEntity } from './offer.entity.js';
 
-@Entity('products')
+@Entity(EntityNames.Products)
 @Check('"price" > 0')
 @Index(['status', 'createdAt'])
 @Index(['sellerId', 'createdAt'])
-export class Product {
+export class ProductEntity extends CoreEntity {
   @Column({ name: 'seller_id', type: 'uuid' })
   sellerId: string;
 
