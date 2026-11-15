@@ -2,7 +2,7 @@ import { Column, Entity, Index } from 'typeorm';
 import { CoreEntity } from '../../../common/abstracts/core.entity.js';
 import { EntityNames } from '../../../common/enums/entity-names.enum.js';
 
-@Entity(EntityNames.User)
+@Entity(EntityNames.Users)
 export class UserEntity extends CoreEntity {
   @Column({ name: 'full_name', nullable: true, default: null })
   fullName: string;
@@ -15,8 +15,8 @@ export class UserEntity extends CoreEntity {
   mobileVerified: boolean;
 
   @Column({ name: 'access_token', nullable: true, default: null })
-  accessToken: string
+  accessToken: string;
 
   @Column({ name: 'refresh_token', nullable: true, default: null })
-  refreshToken: string
+  refreshToken: string;
 }
