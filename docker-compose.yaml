@@ -1,0 +1,46 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3003:3003"
+    env_file: .env
+    environment:
+      # override host-local values with compose service names
+      DB_HOST: db
+      REDIS_HOST: redis
+      NODE_ENV: development # keep synchronize=true for local dev
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-divar}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432" # host 5432 is already used by another project
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-divar}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redisdata:/data
+    ports:
+      - "6380:6379" # host 6379 is already used by the redis container
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
