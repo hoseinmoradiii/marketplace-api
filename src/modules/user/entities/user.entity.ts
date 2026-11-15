@@ -1,8 +1,8 @@
 import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { CoreEntity } from '../../../common/abstracts/core.entity.js';
 import { EntityNames } from '../../../common/enums/entity-names.enum.js';
-import { ProductEntity } from '../../product/entities/product.entity.js';
-import { OfferEntity } from '../../product/entities/offer.entity.js';
+import { ProductEntity } from '../../deal/entities/product.entity.js';
+import { OfferEntity } from '../../deal/entities/offer.entity.js';
 
 @Entity(EntityNames.Users)
 export class UserEntity extends CoreEntity {

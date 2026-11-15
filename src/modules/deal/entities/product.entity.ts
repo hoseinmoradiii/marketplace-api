@@ -1,9 +1,6 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   ManyToOne,
   OneToMany,
   JoinColumn,
@@ -18,8 +15,8 @@ import { OfferEntity } from './offer.entity.js';
 
 @Entity(EntityNames.Products)
 @Check('"price" > 0')
-@Index(['status', 'createdAt'])
-@Index(['sellerId', 'createdAt'])
+@Index(['status', 'created_at'])
+@Index(['seller_id', 'created_at'])
 export class ProductEntity extends CoreEntity {
   @Column({ name: 'seller_id', type: 'uuid' })
   sellerId: string;

@@ -1,14 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
-  Index,
-  Check,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index, Check } from 'typeorm';
 import { EntityNames } from '../../../common/enums/entity-names.enum.js';
 import { ProductEntity } from './product.entity.js';
 import { CoreEntity } from '../../../common/abstracts/core.entity.js';
@@ -17,12 +7,12 @@ import { UserEntity } from '../../user/entities/user.entity.js';
 
 @Entity(EntityNames.Offers)
 @Check('"amount" > 0')
-@Index('IDX_offer_one_pending_per_buyer', ['productId', 'buyerId'], {
+@Index('IDX_offer_one_pending_per_buyer', ['product_id', 'buyer_id'], {
   unique: true,
   where: '"status" = \'PENDING\'',
 })
-@Index(['productId', 'status', 'createdAt'])
-@Index(['buyerId', 'createdAt'])
+@Index(['product_id', 'status', 'created_at'])
+@Index(['buyer_id', 'created_at'])
 export class OfferEntity extends CoreEntity {
   @Column({ name: 'product_id', type: 'uuid' })
   productId: string;
