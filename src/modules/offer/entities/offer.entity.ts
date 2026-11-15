@@ -1,23 +1,23 @@
 import { Entity, Column, ManyToOne, JoinColumn, Index, Check } from 'typeorm';
+import type { ProductEntity } from '../../product/entities/product.entity.js';
+import type { UserEntity } from '../../user/entities/user.entity.js';
 import { EntityNames } from '../../../common/enums/entity-names.enum.js';
-import { ProductEntity } from './product.entity.js';
 import { CoreEntity } from '../../../common/abstracts/core.entity.js';
 import { OfferStatus } from '../utils/enums/offer-status.enum.js';
-import { UserEntity } from '../../user/entities/user.entity.js';
 
 @Entity(EntityNames.Offers)
 @Check('"amount" > 0')
-@Index('IDX_offer_one_pending_per_buyer', ['product_id', 'buyer_id'], {
+@Index('IDX_offer_one_pending_per_buyer', ['productId', 'buyerId'], {
   unique: true,
   where: '"status" = \'PENDING\'',
 })
-@Index(['product_id', 'status', 'created_at'])
-@Index(['buyer_id', 'created_at'])
+@Index(['productId', 'status', 'createdAt'])
+@Index(['buyerId', 'createdAt'])
 export class OfferEntity extends CoreEntity {
   @Column({ name: 'product_id', type: 'uuid' })
   productId: string;
 
-  @ManyToOne(() => ProductEntity, (product) => product.offers, {
+  @ManyToOne(EntityNames.Products, (product: ProductEntity) => product.offers, {
     nullable: false,
     onDelete: 'RESTRICT',
   })
@@ -27,7 +27,7 @@ export class OfferEntity extends CoreEntity {
   @Column({ name: 'buyer_id', type: 'uuid' })
   buyerId: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.offers, {
+  @ManyToOne(EntityNames.Users, (user: UserEntity) => user.offers, {
     nullable: false,
     onDelete: 'RESTRICT',
   })

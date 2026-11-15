@@ -1,9 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class OtpResponse {
   @ApiProperty({ example: '+989123456789' })
   mobile: string;
 
-  @ApiProperty({ example: '483920' })
-  otp: string;
+  @ApiPropertyOptional({
+    example: '483920',
+    description: 'Only returned outside production (until SMS provider is wired)',
+  })
+  otp?: string;
 }

@@ -4,7 +4,7 @@ import { CoreEntity } from '../abstracts/core.entity.js';
 import { OutboxStatus } from '../enums/outbox-status.enum.js';
 
 @Entity(EntityNames.OutBoxes)
-@Index(['status', 'created_at'])
+@Index(['status', 'createdAt'])
 export class OutboxEntity extends CoreEntity {
   @Column({ name: 'event_type', type: 'varchar', length: 150 })
   eventType: string;

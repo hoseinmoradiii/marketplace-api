@@ -1,118 +1,190 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Marketplace API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A marketplace API built with **NestJS 12**, **TypeORM + PostgreSQL**, **Redis**, and **JWT auth via mobile OTP**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- **OTP authentication** — mobile number + 6-digit OTP (HMAC-hashed, stored in Redis with TTL, attempt limits, and resend cooldown). Access + refresh JWT pair.
+- **Users** — profile lookup, full-name update, mobile change (triggers re-verification OTP), account deletion.
+- **Products** — create, browse active feed, list own products (paginated, status filter), mark sold, cancel.
+- **Offers** — buyers offer on active products (amount ≥ price), sellers accept/reject, buyers withdraw. Accepting reserves the product and auto-rejects competing pending offers — all in one DB transaction with row locks.
+- **Swagger UI** — auto-generated docs at `/swagger` (disabled when `NODE_ENV=production`).
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Tech stack
 
-## Project setup
+NestJS · TypeScript (ESM) · TypeORM · PostgreSQL · Redis (ioredis) · Passport JWT · class-validator · Swagger · Docker Compose · Vitest
 
-```bash
-$ npm install
+## Project structure
+
+```
+src/
+├── main.ts                     # bootstrap: helmet, validation pipe, filters, swagger (non-prod)
+├── app.module.ts
+├── data-source.ts              # TypeORM CLI data source (migrations)
+├── configs/                    # typeorm, swagger config
+├── common/                     # core entity, outbox entity, logger, filters, enums
+└── modules/
+    ├── auth/                   # OTP send/verify, token service, JWT strategies & guards, dtos
+    ├── user/                   # profile endpoints, UserEntity, repository
+    ├── redis/                  # Redis module/service
+    ├── product/                # ProductEntity, repository, service, controller, dtos, enums
+    └── offer/                  # OfferEntity, repository, service, controller, dtos, enums
 ```
 
-## Compile and run the project
+## Getting started
+
+### Prerequisites
+
+- Node.js 22+
+- PostgreSQL and Redis running locally (or use Docker Compose — see below)
+
+### Environment
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cp .env.example .env
 ```
 
-## Run tests
+Fill in `DB_*`, `REDIS_*`, `PORT`, `NODE_ENV`, and generate secrets:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+openssl rand -hex 32   # use for ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, OTP_SECRET
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Install & run
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm install
+npm run start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Swagger UI: `http://localhost:<PORT>/swagger`
 
-## Observability
+### Docker (full stack)
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+```bash
+docker compose up -d --build
+```
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+Starts `app` + `postgres` + `redis`. Compose overrides `DB_HOST=db`, `REDIS_HOST=redis`, and `NODE_ENV` defaults to `development`. Host ports: app `3003`, db `5433`, redis `6380` (chosen to avoid clashes with other local services).
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+## Tests
 
-This project is already instrumented. Create a free account at [observe.nestjs.com](https://observe.nestjs.com), add an application, and paste the generated app key and secret into the `ObserveModule.forRoot()` call in `src/app.module.ts`.
+```bash
+npm run test          # unit tests (vitest)
+npm run test:e2e      # e2e tests
+npm run lint          # oxlint
+npm run build         # production build -> dist/
+npm run start:prod    # node dist/main
+```
 
-The free plan needs no payment details and covers 300,000 events a month. You can also browse the [live demo](https://www.observe-demo.nestjs.com/dashboard) first - the whole dashboard over a busy service's data, with nothing to install.
+## Database migrations (production)
 
-## Resources
+`NODE_ENV=production` disables `synchronize`, so schema changes must go through migrations:
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+npm run build
+npm run migration:generate -- -n AddSomething   # generates src/migrations/*.ts
+npm run migration:run                            # applies migrations (uses dist/data-source.js)
+npm run migration:revert
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observe](https://observe.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## API overview
 
-## Support
+All endpoints require `Authorization: Bearer <accessToken>` unless noted. In non-production environments the OTP is returned in the response body (until an SMS provider is integrated).
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Auth — `/auth`
 
-## Stay in touch
+| Method | Path                        | Description                                      |
+| ------ | --------------------------- | ------------------------------------------------ |
+| POST   | `/auth/send-otp`            | Send login OTP to a mobile number (60s cooldown) |
+| POST   | `/auth/verify-otp`          | Verify OTP → `{ accessToken, refreshToken }`     |
+| POST   | `/auth/resend-access-token` | Exchange refresh token for a new access token    |
+| POST   | `/auth/resend-otp`          | Resend OTP                                       |
+| POST   | `/auth/logout`              | Invalidate stored token hashes (access token)    |
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### User — `/user` (refresh-token guarded)
+
+| Method | Path                  | Description                                                |
+| ------ | --------------------- | ---------------------------------------------------------- |
+| GET    | `/user/whoAmI`        | Current user profile (tokens never exposed)                |
+| PATCH  | `/user/full-name`     | Update full name                                           |
+| POST   | `/user/change-mobile` | Change mobile → sets `mobileVerified=false`, sends new OTP |
+| DELETE | `/user`               | Soft-delete account                                        |
+
+### Products — `/products` (access-token guarded)
+
+| Method | Path                   | Description                                             |
+| ------ | ---------------------- | ------------------------------------------------------- |
+| POST   | `/products`            | Create product `{ title, description, price }`          |
+| GET    | `/products`            | Browse all ACTIVE products (paginated: `page`, `limit`) |
+| GET    | `/products/my`         | Own products, paginated + optional `status` filter      |
+| GET    | `/products/my/active`  | Own active products (`take`, `skip`)                    |
+| PATCH  | `/products/:id/sell`   | Mark own product SOLD                                   |
+| PATCH  | `/products/:id/cancel` | Cancel own product                                      |
+
+### Offers — `/offers` (access-token guarded)
+
+| Method | Path                         | Description                                                                           |
+| ------ | ---------------------------- | ------------------------------------------------------------------------------------- |
+| POST   | `/offers`                    | Send offer `{ productId, amount }` — product must be ACTIVE, amount ≥ price           |
+| POST   | `/offers/:id/accept`         | Seller accepts → offer ACCEPTED, product RESERVED, other pending offers auto-REJECTED |
+| POST   | `/offers/:id/reject`         | Seller rejects a pending offer                                                        |
+| POST   | `/offers/:id/withdraw`       | Buyer withdraws own pending offer                                                     |
+| GET    | `/offers/my`                 | Offers sent by current user — filter by `status`, `sellerId`, paginated               |
+| GET    | `/offers/product/:productId` | Offers on own product — filter by `status`, paginated                                 |
+
+## Flows
+
+### Authentication
+
+```
+client                          api                              redis/db
+  │  POST /auth/send-otp           │                                 │
+  │  { mobile }                    │── store HMAC(otp), TTL 300s ───▶│
+  │◀── { mobile, otp* } ───────────│   (*otp only outside prod)      │
+  │  POST /auth/verify-otp         │                                 │
+  │  { mobile, submittedOtp }      │── verify hash, max 5 attempts ─▶│
+  │◀── { accessToken, refreshToken }│                                │
+  │                                │── store SHA256(token) hashes ──▶│ users
+```
+
+Access tokens guard product/offer endpoints; refresh tokens guard user endpoints and token renewal. Logout clears the stored hashes, invalidating both.
+
+### Product lifecycle
+
+```
+create ──▶ ACTIVE ──offer accepted──▶ RESERVED ──sell──▶ SOLD
+   │           │                            │
+   └──cancel──▶ CANCELLED                   └── (reserved products can't be cancelled)
+```
+
+- Only `ACTIVE` products accept offers and appear in the public feed.
+- `sell`/`cancel` use atomic conditional updates — a concurrent status change returns `400 product status changed, please retry` instead of corrupting state.
+
+### Offer lifecycle
+
+```
+            createOffer (buyer, ACTIVE product, amount >= price)
+                              │
+                            PENDING ──┬── seller accept ──▶ ACCEPTED (product → RESERVED,
+                              │       │                    other pending offers → REJECTED)
+                              ├── seller reject ──▶ REJECTED
+                              └── buyer withdraw ──▶ WITHDRAWN
+```
+
+- One PENDING offer per buyer per product (enforced by a partial unique index + pre-check → `409`).
+- `accept` runs in a transaction with `SELECT ... FOR UPDATE` locks on the offer and product rows, so two sellers/buyers can't race the same offer or product.
+- Status transitions are atomic conditional updates (`UPDATE ... WHERE status='PENDING'`).
+
+## Environment notes
+
+| Variable                                       | Notes                                                                                                     |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `NODE_ENV`                                     | `development` enables TypeORM `synchronize` + Swagger + OTP-in-response. `production` disables all three. |
+| `OTP_SECRET`                                   | HMAC key for OTP hashing — required                                                                       |
+| `ACCESS_TOKEN_SECRET` / `REFRESH_TOKEN_SECRET` | JWT signing secrets — required, keep distinct                                                             |
+| `DB_*` / `REDIS_*`                             | Connection settings                                                                                       |
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+UNLICENSED — internship project.

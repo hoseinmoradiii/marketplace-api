@@ -5,7 +5,8 @@ import { LoggerModule } from './common/logger/logger.module.js';
 import { UserModule } from './modules/user/user.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { RedisModule } from './modules/redis/redis.module.js';
-import { DealModule } from './modules/deal/deal.module.js';
+import { ProductModule } from './modules/product/product.module.js';
+import { OfferModule } from './modules/offer/offer.module.js';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { DealModule } from './modules/deal/deal.module.js';
     TypeormConfig.forRoot(),
     UserModule,
     AuthModule,
-    DealModule,
+    ProductModule,
+    OfferModule,
   ],
 })
 export class AppModule {}

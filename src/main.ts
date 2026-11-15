@@ -20,10 +20,14 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new CatchAllErrorsFilter());
   app.use(helmet());
+  app.enableShutdownHooks();
   const configService = app.get(ConfigService);
   const PORT = configService.getOrThrow<number>('PORT');
+  const isProduction = configService.getOrThrow<string>('NODE_ENV') === 'production';
 
-  SwaggerConfig.forRoot(app);
+  if (!isProduction) {
+    SwaggerConfig.forRoot(app);
+  }
 
   const logger = app.get(Logger);
 
@@ -32,10 +36,12 @@ async function bootstrap() {
       `application is running on http://localhost:${PORT}`,
       'Bootstrap',
     );
-    logger.log(
-      `swagger is running on http://localhost:${PORT}/swagger`,
-      'Bootstrap',
-    );
+    if (!isProduction) {
+      logger.log(
+        `swagger is running on http://localhost:${PORT}/swagger`,
+        'Bootstrap',
+      );
+    }
   });
 }
 

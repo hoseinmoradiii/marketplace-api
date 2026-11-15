@@ -1,7 +1,5 @@
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { CoreEntity } from './core.entity.js';
-import { NotFoundException } from '@nestjs/common';
-
 export abstract class CoreRepository<T extends CoreEntity> {
   constructor(protected readonly repository: Repository<T>) {}
 

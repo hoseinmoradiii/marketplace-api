@@ -6,7 +6,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { createHmac, randomInt } from 'crypto';
+import { createHash, createHmac, randomInt } from 'crypto';
 import { RedisService } from '../../redis/redis.service.js';
 import { TokenService } from './token.service.js';
 import { ConfigService } from '@nestjs/config';
@@ -41,6 +41,10 @@ export class AuthService {
       .digest('hex');
   }
 
+  private hashToken(token: string): string {
+    return createHash('sha256').update(token).digest('hex');
+  }
+
   async sendOtp(mobile: string): Promise<OtpResponse> {
     let user = await this.userRepository.findUserByMobile(mobile);
 
@@ -70,9 +74,11 @@ export class AuthService {
 
     try {
       await this.redisService.storeOtp(key, this.hashOtp(otp), this.OTP_TTL);
-      return { mobile: user.mobile, otp };
       // TODO: Send OTP through SMS provider.
       // await this.smsService.send(mobile, otp);
+      const isProduction =
+        this.configService.getOrThrow<string>('NODE_ENV') === 'production';
+      return isProduction ? { mobile: user.mobile } : { mobile: user.mobile, otp };
     } catch (error) {
       await this.redisService.delete(key);
       await this.redisService.delete(cooldownKey);
@@ -106,8 +112,8 @@ export class AuthService {
     const accessToken = this.tokenService.generateAccessToken(user.id);
     const refreshToken = this.tokenService.generateRefreshToken(user.id);
 
-    user.accessToken = accessToken;
-    user.refreshToken = refreshToken;
+    user.accessToken = this.hashToken(accessToken);
+    user.refreshToken = this.hashToken(refreshToken);
     user.mobileVerified = true;
 
     await this.userRepository.save(user);
@@ -123,10 +129,10 @@ export class AuthService {
     if (!payload || !payload.sub)
       throw new UnauthorizedException('invalid token');
     const user = await this.userRepository.findById(payload.sub);
-    if (!user || user.refreshToken !== refreshToken)
+    if (!user || user.refreshToken !== this.hashToken(refreshToken))
       throw new UnauthorizedException('Invalid refresh token');
     const accessToken = this.tokenService.generateAccessToken(user.id);
-    user.accessToken = accessToken;
+    user.accessToken = this.hashToken(accessToken);
     await this.userRepository.save(user);
     return { accessToken };
   }

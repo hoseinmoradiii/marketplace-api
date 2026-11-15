@@ -8,10 +8,10 @@ import {
 export class SwaggerConfig {
   static forRoot(app: INestApplication) {
     const config = new DocumentBuilder()
-      .setTitle('True Offers API')
+      .setTitle('Divar API')
       .setDescription(
         [
-          'REST API for the **True Offers** marketplace platform.',
+          'REST API for the **Divar** marketplace platform.',
           '',
           '### Authentication',
           'Protected endpoints require a **JWT Bearer token** in the `Authorization` header.',

@@ -7,21 +7,21 @@ import {
   Index,
   Check,
 } from 'typeorm';
-import { UserEntity } from '../../user/entities/user.entity.js';
+import type { UserEntity } from '../../user/entities/user.entity.js';
 import { ProductStatus } from '../utils/enums/product-status.enum.js';
 import { EntityNames } from '../../../common/enums/entity-names.enum.js';
 import { CoreEntity } from '../../../common/abstracts/core.entity.js';
-import { OfferEntity } from './offer.entity.js';
+import { OfferEntity } from '../../offer/entities/offer.entity.js';
 
 @Entity(EntityNames.Products)
 @Check('"price" > 0')
-@Index(['status', 'created_at'])
-@Index(['seller_id', 'created_at'])
+@Index(['status', 'createdAt'])
+@Index(['sellerId', 'createdAt'])
 export class ProductEntity extends CoreEntity {
   @Column({ name: 'seller_id', type: 'uuid' })
   sellerId: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.products, {
+  @ManyToOne(EntityNames.Users, (user: UserEntity) => user.products, {
     nullable: false,
     onDelete: 'RESTRICT',
   })

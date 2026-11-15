@@ -16,8 +16,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UserService } from './user.service.js';
+import type { PublicUser } from './user.service.js';
 import { AuthService } from '../auth/services/auth.service.js';
-import { UserEntity } from './entities/user.entity.js';
 import { UserId } from './decorators/user-id.decorator.js';
 import { RefreshTokenGuard } from '../auth/guards/refresh-token.guard.js';
 import { UpdateFullNameDto } from './dtos/update-full-name.dto.js';
@@ -36,10 +36,10 @@ export class UserController {
 
   @Get('whoAmI')
   @ApiOperation({ summary: 'Get the current user profile' })
-  @ApiResponse({ status: 200, description: 'Current user', type: UserEntity })
+  @ApiResponse({ status: 200, description: 'Current user' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async whoAmI(@UserId() userId: string): Promise<UserEntity> {
+  async whoAmI(@UserId() userId: string): Promise<PublicUser> {
     return this.userService.whoAmI(userId);
   }
 
@@ -55,13 +55,13 @@ export class UserController {
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'Updated user', type: UserEntity })
+  @ApiResponse({ status: 200, description: 'Updated user' })
   @ApiResponse({ status: 400, description: 'Validation failed' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async updateFullName(
     @UserId() userId: string,
     @Body() dto: UpdateFullNameDto,
-  ): Promise<UserEntity> {
+  ): Promise<PublicUser> {
     return this.userService.updateFullName(userId, dto.fullName);
   }
 

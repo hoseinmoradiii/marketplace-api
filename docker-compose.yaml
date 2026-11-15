@@ -8,7 +8,7 @@ services:
       # override host-local values with compose service names
       DB_HOST: db
       REDIS_HOST: redis
-      NODE_ENV: development # keep synchronize=true for local dev
+      NODE_ENV: ${NODE_ENV:-development} # production disables synchronize, swagger and OTP-in-response
     depends_on:
       db:
         condition: service_healthy
