@@ -4,16 +4,15 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
-
 import { createHmac, randomInt } from 'node:crypto';
-
 import { RedisService } from '../../redis/redis.service.js';
 import { TokenService } from './token.service.js';
 import { ConfigService } from '@nestjs/config';
 import { UserRepository } from '../../user/user.repository.js';
 import { UserEntity } from '../../user/entities/user.entity.js';
-import { Tokens } from '../utils/token.type.js';
+import { AccessToken, Tokens } from '../utils/token.type.js';
 import { OtpResponse } from '../utils/otp.type.js';
 
 @Injectable()
@@ -109,6 +108,7 @@ export class AuthService {
 
     user.accessToken = accessToken;
     user.refreshToken = refreshToken;
+    user.mobileVerified = true;
 
     await this.userRepository.save(user);
 
@@ -116,5 +116,31 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  async regenerateAccessToken(refreshToken: string): Promise<AccessToken> {
+    const payload = this.tokenService.verifyRefreshToken(refreshToken);
+    if (!payload || !payload.userId)
+      throw new UnauthorizedException('invalid token');
+    const user = await this.userRepository.findById(payload.userId);
+    if (!user || user.refreshToken !== refreshToken)
+      throw new UnauthorizedException('Invalid refresh token');
+    const accessToken = this.tokenService.generateAccessToken(user.id);
+    user.accessToken = accessToken;
+    await this.userRepository.save(user);
+    return { accessToken };
+  }
+
+  async logout(userId: string): Promise<boolean> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new UnauthorizedException('user is not authorized');
+    user.accessToken = '';
+    user.refreshToken = '';
+    await this.userRepository.save(user);
+    return true;
+  }
+
+  async resendOtp(mobile: string): Promise<OtpResponse> {
+    return this.sendOtp(mobile);
   }
 }
