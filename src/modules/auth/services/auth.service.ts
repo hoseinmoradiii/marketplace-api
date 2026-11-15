@@ -6,7 +6,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { createHmac, randomInt } from 'node:crypto';
+import { createHmac, randomInt } from 'crypto';
 import { RedisService } from '../../redis/redis.service.js';
 import { TokenService } from './token.service.js';
 import { ConfigService } from '@nestjs/config';
